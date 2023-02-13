@@ -30,7 +30,9 @@ func main() {
 // cors_coomer function that will be called when the endpoint is hit
 func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	
 
 	// get the url from request param
 	url := r.URL.Query().Get("url")
@@ -46,12 +48,13 @@ func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	// make a request to the url and get the response body
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		// write error with fprintf
-		fmt.Fprintf(w, "Some crazy ass shit is going on: %s", err.Error())
-		return
-	}
+req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
+if err != nil {
+	// write error with fprintf
+	fmt.Fprintf(w, "Some crazy ass shit is going on: %s", err.Error())
+	return
+}
 
 	client := http.Client{}
 	resp, err := client.Do(req)
