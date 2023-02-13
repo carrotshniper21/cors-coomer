@@ -32,8 +32,6 @@ func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
-	
-	
 
 	// get the url from request param
 	url := r.URL.Query().Get("url")
@@ -49,13 +47,13 @@ func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	// make a request to the url and get the response body
-req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
-if err != nil {
-	// write error with fprintf
-	fmt.Fprintf(w, "Some crazy ass shit is going on: %s", err.Error())
-	return
-}
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
+	if err != nil {
+		// write error with fprintf
+		fmt.Fprintf(w, "Some crazy ass shit is going on: %s", err.Error())
+		return
+	}
 
 	client := http.Client{}
 	resp, err := client.Do(req)
@@ -73,14 +71,13 @@ if err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	
-	// check if the input url ends with .m3u8 and set the content type and disposition headers
-	if strings.HasSuffix(url, ".m3u8") {
-	w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
-	w.Header().Set("Content-Disposition", "attachment; filename=stream.m3u8")
-	}
-	
-	
+
+	// // check if the input url ends with .m3u8 and set the content type and disposition headers
+	// if strings.HasSuffix(url, ".m3u8") {
+	// w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
+	// w.Header().Set("Content-Disposition", "attachment; filename=stream.m3u8")
+	// }
+
 	w.Write(body)
 	if resp.StatusCode == 200 {
 		fmt.Println("Success on " + url + " with status code " + resp.Status)
