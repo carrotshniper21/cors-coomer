@@ -32,7 +32,7 @@ func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Content-Disposition", "attachment; filename=stream.m3u8")
+	
 	
 
 	// get the url from request param
@@ -73,6 +73,14 @@ if err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}
+	
+	// check if the input url ends with .m3u8 and set the content type and disposition headers
+	if strings.HasSuffix(url, ".m3u8") {
+	w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
+	w.Header().Set("Content-Disposition", "attachment; filename=stream.m3u8")
+	}
+	
+	
 	w.Write(body)
 	if resp.StatusCode == 200 {
 		fmt.Println("Success on " + url + " with status code " + resp.Status)
