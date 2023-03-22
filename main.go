@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -28,7 +30,6 @@ func main() {
 }
 
 // cors_coomer function that will be called when the endpoint is hit
-// cors_coomer function that will be called when the endpoint is hit
 func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "*")
@@ -51,13 +52,31 @@ func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	// read the request body if it's a POST request
+	var requestBody io.Reader
+	if r.Method == http.MethodPost {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
+		requestBody = bytes.NewReader(body)
+	}
+
 	// make a request to the url and get the response body
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
+	req, err := http.NewRequestWithContext(ctx, method, url, requestBody)
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 	if err != nil {
 		// write error with fprintf
 		fmt.Fprintf(w, "Some crazy ass shit is going on: %s", err.Error())
 		return
+	}
+
+	// copy headers from the original request to the outgoing request
+	for key, values := range r.Header {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
 	}
 
 	client := http.Client{}
