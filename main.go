@@ -20,7 +20,7 @@ func main() {
 
 	http.HandleFunc("/", cors_coomer)
 	fmt.Println("Server is running on port " + PORT)
-	fmt.Println("http://localhost:" + PORT + "/?url=https://example.com")
+	fmt.Println("http://localhost:" + PORT + "/?url=https://example.com" + "&method=GET")
 	fmt.Print("Press Ctrl + C to stop the server")
 
 	// start the server
