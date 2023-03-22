@@ -28,13 +28,18 @@ func main() {
 }
 
 // cors_coomer function that will be called when the endpoint is hit
+// cors_coomer function that will be called when the endpoint is hit
 func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 
-	// get the url from request param
+	// get the url and method from request params
 	url := r.URL.Query().Get("url")
+	method := r.URL.Query().Get("method")
+	if method == "" {
+		method = "GET"
+	}
 
 	// control concurrency by blocking the semaphore channel until a spot is available
 	semaphore <- true
@@ -47,7 +52,7 @@ func cors_coomer(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	// make a request to the url and get the response body
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, method, url, nil)
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
 	if err != nil {
 		// write error with fprintf
@@ -71,12 +76,6 @@ func cors_coomer(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-
-	// // check if the input url ends with .m3u8 and set the content type and disposition headers
-	// if strings.HasSuffix(url, ".m3u8") {
-	// w.Header().Set("Content-Type", "application/vnd.apple.mpegurl")
-	// w.Header().Set("Content-Disposition", "attachment; filename=stream.m3u8")
-	// }
 
 	w.Write(body)
 	if resp.StatusCode == 200 {
